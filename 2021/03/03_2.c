@@ -12,56 +12,29 @@ typedef struct number {
 
 typedef STAILQ_HEAD(number_list, number) number_list;
 
-
 void
-remove_from_scrubber(number_list * scrubber,int n)
-{
-    long counttotal=0;
-    long count1=0;
-    long count0=0;
-    number * numberp;
-    STAILQ_FOREACH(numberp, scrubber, pointer) {
-        count1+=IS_BIT_SET(numberp->value,n);
-        counttotal++;
-    }
-    if(counttotal==1) return;
-    numberp = STAILQ_FIRST(scrubber);
-    STAILQ_FOREACH(numberp, scrubber, pointer) {
-        if(count1>=(counttotal-count1)&&IS_BIT_SET(numberp->value, n)) {
-            STAILQ_REMOVE(scrubber, numberp, number, pointer);
-        } else if(count1<(counttotal-count1)&&!IS_BIT_SET(numberp->value, n)) {
-            STAILQ_REMOVE(scrubber, numberp, number, pointer);
-        }
-    }
-    if(n==0) return;
-    return remove_from_scrubber(scrubber, n-1);
-}
-
-void
-remove_from_oxygen(number_list * oxygen,int n)
+remove_from_list(number_list * list,int n,int select)
 {
     int counttotal=0;
     int count1=0;
-    int count0=0;
     number * numberp;
-    STAILQ_FOREACH(numberp, oxygen, pointer) {
+    STAILQ_FOREACH(numberp, list, pointer) {
         count1+=IS_BIT_SET(numberp->value,n);
         counttotal++;
     }
+
     if(counttotal==1) return;
-    numberp = STAILQ_FIRST(oxygen);
-    STAILQ_FOREACH(numberp, oxygen, pointer) {
-        ;
-        if(count1>=(counttotal-count1)&&!IS_BIT_SET(numberp->value, n)) {
-            STAILQ_REMOVE(oxygen, numberp, number, pointer);
-        } else if(count1<(counttotal-count1)&&IS_BIT_SET(numberp->value, n)) {
-            STAILQ_REMOVE(oxygen, numberp, number, pointer);
+    numberp = STAILQ_FIRST(list);
+    STAILQ_FOREACH(numberp, list, pointer) {
+        if(count1>=(counttotal-count1)&&!IS_BIT_SET(numberp->value, n)^select) {
+            STAILQ_REMOVE(list, numberp, number, pointer);
+        } else if(count1<(counttotal-count1)&&IS_BIT_SET(numberp->value, n)^select) {
+            STAILQ_REMOVE(list, numberp, number, pointer);
         }
     }
     if(n==0) return;
-    return remove_from_oxygen(oxygen, n-1);
+    return remove_from_list(list, n-1,select);
 }
-
 
 int
 main(int argc, char *argv[])
@@ -95,8 +68,8 @@ main(int argc, char *argv[])
         totalNums++;
     }
     fclose(file);
-    remove_from_oxygen(&oxygen,bit_columns-1);
-    remove_from_scrubber(&scrubber,bit_columns-1);
+    remove_from_list(&oxygen,bit_columns-1,1);
+    remove_from_list(&scrubber,bit_columns-1,0);
 
     printf("%ld\n",scrubber.stqh_first->value*oxygen.stqh_first->value);
     return 0;
