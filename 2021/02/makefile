@@ -4,7 +4,7 @@ obj=$(src:.c=.o)
 all: $(obj)
 
 %.o: %.c
-	gcc $< -o $@
+	gcc -Wall $< -o $@
 
 clean:
 	@rm -rf $(obj)
