@@ -138,8 +138,6 @@ main(int argc, char *argv[])
             mark_board(&boards[i],atoi(token));
             /* print_board(boards[i]); */
             /* printf("\n"); */
-        }
-        for (int i = 0; i < numBoards; i++) {
             int line = verify_lines_board(&boards[i]);
             if(line>=0){
                 printf("%d\n",atoi(token)*sum_unmarked_board(&boards[i]));
