@@ -117,7 +117,6 @@ main(int argc, char *argv[])
 
     FILE * file = fopen(argv[1], "r");
     char *bit, *token;
-    int number;
     char *saveptr;
     // get drawn numbers
     fscanf(file, "%ms",&bit);
