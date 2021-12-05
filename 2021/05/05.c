@@ -53,25 +53,15 @@ main(int argc, char *argv[])
     int x2,y2;
     Board board;
     initialize_board(&board);
+
     while(fscanf(file, "%d,%d -> %d,%d",&x1,&y1,&x2,&y2)!=EOF)
     {
         if(x1==x2||y1==y2)
         {
-            if(x2<x1||y2<y1){
-                int temp=x1;
-                x1=x2;
-                x2=temp;
-                temp = y1;
-                y1=y2;
-                y2=temp;
-            }
-
-            for(int i=x1;i<=x2;i++)
+            for(int i=x1,j=y1;;i+=abs(x2-i)>0?(x2-i)/abs(x2-i):0,j+=abs(y2-j)>0?(y2-j)/abs(y2-j):0)
             {
-                for(int j=y1;j<=y2;j++)
-                {
-                    board.numbers[j][i]+=1;
-                }
+                board.numbers[j][i]+=1;
+                if(i==x2&&j==y2) break;
             }
         }
     }
