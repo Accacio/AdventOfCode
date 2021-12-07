@@ -2,6 +2,26 @@
 #include <stdlib.h>
 #include <string.h>
 
+long
+max_array(int * array,int count)
+{
+    long maximum=array[0];
+    for (int i = 1; i < count; i++) {
+        if(array[i]>maximum) maximum=array[i];
+    }
+    return maximum;
+}
+
+long
+min_array(int * array, int count)
+{
+    long minimum=array[0];
+    for (int i = 1; i < count; i++) {
+        if(array[i]<minimum) minimum=array[i];
+    }
+    return minimum;
+}
+
 int
 main(int argc, char *argv[])
 {
@@ -31,14 +51,12 @@ main(int argc, char *argv[])
 
     long minimum;
     long minimumidx;
-    for (int i = 0; i < count; i++) {
+    for (long i = min_array(numbers,count); i <= max_array(numbers,count); i++) {
         long sum=0;
         for (int j=0; j < count; j++) {
-            if(j!=i){
-                sum+=abs(numbers[i]-numbers[j]);
-                if(sum>=minimum){
-                    break;
-                }
+            sum+=abs(i-numbers[j]);
+            if(sum>=minimum){
+                break;
             }
         }
         if(sum<minimum){
@@ -46,7 +64,7 @@ main(int argc, char *argv[])
             minimumidx=i;
         }
     }
-    printf("Fuel: \033[34m%ld\033[0m | Index: %ld\n",minimum,minimumidx);
+    printf("Fuel: \033[34m%ld\033[0m | position: %ld\n",minimum,minimumidx);
 
     return 0;
 }
