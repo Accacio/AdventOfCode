@@ -27,10 +27,10 @@ main(int argc, char *argv[])
             for (int i = 0; i < 4; i++) {
                 sscanf(saveptr, "%ms",&s);
                 switch (strlen(s)) {
-                    case 2:
-                    case 3:
-                    case 4:
-                    case 7:
+                    case 2: // #1
+                    case 3: // #7
+                    case 4: // #4
+                    case 7: // #8
                         count++;
                         break;
                     default:
