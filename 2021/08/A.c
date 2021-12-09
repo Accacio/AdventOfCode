@@ -12,7 +12,6 @@ main(int argc, char *argv[])
 
     FILE * file = fopen(argv[1], "r");
     char *line;
-    fscanf(file, "%ms",&line);
 
     int count=0;
     while(fscanf(file, "%m[^|]s",&line)!=EOF)
