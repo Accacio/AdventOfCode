@@ -4,12 +4,53 @@
 
 typedef struct Map {
     int *data;
-    int *visited;
+    long *costs;
     int nmap;
     int nmax;
     int cols;
     int rows;
 } Map;
+
+typedef struct queue {
+    long * data;
+    long max;
+    long start;
+    long size;
+} queue;
+
+void
+init_queue(queue * queue, long max)
+{
+    queue->max = max;
+    queue->start = 0;
+    queue->size = 0;
+    queue->data = malloc(2*max*sizeof(long));
+    memset(queue->data, 0, 2*max*sizeof(long));
+}
+
+void
+enqueue(queue * queue, long i, long j)
+{
+    long place;
+    if(queue->size < queue->max) {
+        place = (queue->start+queue->size)%queue->max;
+        *(queue->data+place*2)=i;
+        *(queue->data+place*2+1)=j;
+        queue->size++;
+    }
+}
+
+void
+dequeue(queue * queue, long * i, long * j)
+{
+    if(queue->size > 0) {
+        *i = *(queue->data+queue->start*2);
+        *j = *(queue->data+queue->start*2+1);
+        queue->start = (queue->start+1)%queue->max;
+        queue->size--;
+    }
+}
+
 
 void
 init_map(Map * map,int nmax)
@@ -20,19 +61,19 @@ init_map(Map * map,int nmax)
     map->nmap=0;
     map->data = malloc(map->nmax*sizeof(int));
     memset(map->data, 0, map->nmax*sizeof(int));
-    map->visited = malloc(map->nmax*sizeof(int));
-    memset(map->visited, 0, map->nmax*sizeof(int));
+    map->costs = malloc(map->nmax*sizeof(long));
+    memset(map->costs, 1, map->nmax*sizeof(long));
 }
 
 void
 map_add_value(Map * map, int value)
 {
     if(map->nmap==map->nmax) {
-       map->data = realloc(map->data, 2*map->nmax*sizeof(int));
-       memset(map->data+map->nmax, 0, map->nmax*sizeof(int));
-       map->visited = realloc(map->visited, 2*map->nmax*sizeof(int));
-       memset(map->visited+map->nmax, 0, map->nmax*sizeof(int));
-       map->nmax*=2;
+        map->data = realloc(map->data, 2*map->nmax*sizeof(int));
+        memset(map->data+map->nmax, 0, map->nmax*sizeof(int));
+        map->costs = realloc(map->costs, 2*map->nmax*sizeof(long));
+        memset(map->costs+map->nmax, 1, map->nmax*sizeof(long));
+        map->nmax*=2;
     }
     *(map->data+map->nmap)=value;
     map->nmap++;
@@ -50,102 +91,52 @@ print_map(Map * map)
     }
 }
 
-static
 void
-print_visited(Map * map)
+print_costs(Map * map)
 {
     for (int i = 0; i < map->rows; i++) {
         for (int j = 0; j < map->cols; j++) {
-            printf("%d", *(map->visited+j+i*map->rows));
+            printf("%2lu\t", *(map->costs+j+i*map->rows));
         }
         printf("\n");
     }
 }
 
-
 unsigned
 long
-find_path_util(Map * map, unsigned long currentTotal, unsigned long currentMinimum,int cur,int end)
+find_path(Map * map)
 {
-    unsigned long ret=0;
-    int curx=cur%map->cols;
-    int cury=cur/map->cols;
-    printf("(%d,%d) %d\n",curx,cury,*(map->data+cur));
-    /* if(ret>minimum) */
-    /* printf("%d\n", *(map->data+cur)); */
-    *(map->visited+cur)=1;
-    if(cur==end) {
-        *(map->visited+end)=0;
-        printf("Found a path\n");
-        return currentTotal;
-    }
-    /* print_visited(map); */
-    /* printf("\n"); */
 
-    unsigned long subtotalmin=-1;
+    int neighbours[4][2] = {{-1, 0},
+                            {0, -1},
+                            {1, 0},
+                            {0, 1}};
+    queue queue;
+    init_queue(&queue,1000);
 
-    for (int i=1; i>=0; i--) {
-        for (int j = 1; j >= 0; j--) {
-            if(i!=j&&i!=-j) {
-                int nextx=curx+i;
-                int nexty=cury+j;
-                if(nextx>=0&&nextx<map->cols&&nexty>=0&&nexty<map->rows){
-                    int next=nexty*map->cols+nextx;
-                    int nextvalue=*(map->data+next);
-                    if(next<map->nmap && nextvalue+currentTotal < currentMinimum && *(map->visited+next)!=1) {
-                        /* printf("visit\n"); */
-                        unsigned long tot=find_path_util(map, currentTotal, currentMinimum, next, end);
-                        subtotalmin = nextvalue+tot<subtotalmin ? nextvalue+tot : subtotalmin;
-                        /* printf("visited found %ld %ld %d\n",tot,subtotalmin,tot<=subtotalmin); */
-                    }
+    *(map->costs) = 0;
+    enqueue(&queue, 0, 0);
+
+    long ci,cj;
+    while (queue.size>0) {
+        dequeue(&queue , &ci, &cj);
+        for (int i = 0; i < 4; i++) {
+            long neigi = ci+neighbours[i][0];
+            long neigj = cj+neighbours[i][1];
+            if(neigi>=0&&neigj>=0&&neigi<map->cols&&neigj<map->rows)
+            {
+                long *dist = (map->costs+neigi+neigj*map->cols);
+                long alt = *(map->costs+ci+cj*map->cols) + *(map->data+neigi+neigj*map->cols);
+                if(alt<*dist)
+                {
+                    *dist = alt;
+                    enqueue(&queue, neigi, neigj); // should enqueue using sort
                 }
             }
         }
     }
 
-    *(map->visited+cur)=0;
-
-    /* printf("%ld ",subtotalmin); */
-
-
-    return subtotalmin+currentTotal;
-
-}
-
-/* long */
-/* graph_search_paths(Graph * graph, int initial, int final, int visitedTwiceAlready) */
-/* { */
-/*     long ret= 0; */
-/*     Node * cur=graph->nodes+initial; */
-/*     cur->timesVisited++; */
-
-/*     if(cur->numId==final) { */
-/*         cur->timesVisited--; */
-/*         return 1; */
-/*     } */
-
-/*     for (int i=0; i < cur->totalEdges; i++) { */
-/*         Node * next = graph->nodes+cur->edges[i]; */
-/*         int visited=visitedTwiceAlready; */
-/*         if(next->numId==0||((!next->big && next->timesVisited>0)&&visitedTwiceAlready)) { */
-/*             continue; */
-/*         } */
-/*         if(!next->big && next->timesVisited>0&&!visitedTwiceAlready) { */
-/*             visited=1; */
-/*         } */
-/*         ret+=graph_search_paths(graph, next->numId, final,visited); */
-/*     } */
-/*     cur->timesVisited--; */
-/*     return ret; */
-/* } */
-
-unsigned
-long
-find_path(Map * map)
-{
-    unsigned long ret=-1;
-    ret=find_path_util(map, 0, ret,0, map->nmap-1);
-    return ret;
+    return *(map->costs+map->cols-1+(map->rows-1)*map->cols);
 }
 
 int
@@ -184,11 +175,7 @@ main(int argc, char *argv[])
         } while (saveptr!=line+strlen(line));
         free(line);
     }
-    /* print_map(&map); */
-    printf("Total = %d\n\n",map.nmap);
-
     printf("%lu\n", find_path(&map));
-
 
     return 0;
 }
