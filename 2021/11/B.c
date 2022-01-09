@@ -118,7 +118,6 @@ main (int argc, char *argv[])
       while (saveptr != line + strlen (line));
     }
 
-  long totalFlashes = 0;
   int *zeroMap = malloc (10 * 10 * sizeof (int));
   memset (zeroMap, 0, 10 * 10 * sizeof (int));
 
@@ -127,7 +126,7 @@ main (int argc, char *argv[])
     {
       printf ("\033[2J\033[1;1H");
       sum_value_map (&map, 1);
-      long flashes = propagate_flash (&map);
+      propagate_flash (&map);
       int cmp = memcmp (map.map, zeroMap, 10 * 10 * sizeof (int)) == 0;
       print_map (map);
       printf ("\n");
