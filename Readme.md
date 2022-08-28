@@ -15,7 +15,7 @@
 | <ul><li>- [x] 13</li><ul> |
 | <ul><li>- [x] 14</li><ul> |
 | <ul><li>- [x] 15</li><ul> |
-| <ul><li>- [ ] 16</li><ul> |
+| <ul><li>- [x] 16</li><ul> |
 | <ul><li>- [ ] 17</li><ul> |
 | <ul><li>- [ ] 18</li><ul> |
 | <ul><li>- [ ] 19</li><ul> |
